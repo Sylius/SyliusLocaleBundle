@@ -4,4 +4,4 @@
 sylius:
     form:
         locale:
-            name: Nom
+            name: Nosaukums

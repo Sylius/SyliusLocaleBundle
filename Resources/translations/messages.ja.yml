@@ -4,4 +4,4 @@
 sylius:
     form:
         locale:
-            name: Naziv regije
+            name: ゾーン名
