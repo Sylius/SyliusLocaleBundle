@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\Definition;
 
 final class SyliusLocaleExtensionTest extends AbstractExtensionTestCase
 {
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_autoconfigures_locale_context_with_attribute(): void
     {
         $this->container->setDefinition(
