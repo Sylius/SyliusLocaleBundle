@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Sylius\Bundle\LocaleBundle\Tests\DependencyInjection;
 
-use PHPUnit\Framework\Attributes\Test;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Sylius\Bundle\LocaleBundle\Attribute\AsLocaleContext;
 use Sylius\Bundle\LocaleBundle\DependencyInjection\SyliusLocaleExtension;
 use Sylius\Bundle\LocaleBundle\Tests\Stub\LocaleContextStub;
