@@ -11,29 +11,31 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\LocaleBundle\Doctrine\EventListener;
+namespace Sylius\Bundle\LocaleBundle\Tests\Doctrine\EventListener;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\LocaleBundle\Doctrine\EventListener\LocaleModificationListener;
 use Symfony\Contracts\Cache\CacheInterface;
 
 final class LocaleModificationListenerTest extends TestCase
 {
-    /**
-     * @var CacheInterface|MockObject
-     */
-    private MockObject $cacheMock;
+    /** @var CacheInterface&MockObject */
+    private CacheInterface $cache;
+
     private LocaleModificationListener $localeModificationListener;
+
     protected function setUp(): void
     {
-        $this->cacheMock = $this->createMock(CacheInterface::class);
-        $this->localeModificationListener = new LocaleModificationListener($this->cacheMock);
+        parent::setUp();
+        $this->cache = $this->createMock(CacheInterface::class);
+        $this->localeModificationListener = new LocaleModificationListener($this->cache);
     }
 
     public function testInvalidatesCache(): void
     {
-        $this->cacheMock->expects($this->once())->method('delete')->with('sylius_locales');
+        $this->cache->expects(self::once())->method('delete')->with('sylius_locales');
+
         $this->localeModificationListener->invalidateCachedLocales();
     }
 }

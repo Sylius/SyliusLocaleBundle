@@ -11,10 +11,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\LocaleBundle\Context;
+namespace Sylius\Bundle\LocaleBundle\Tests\Context;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\LocaleBundle\Context\RequestHeaderBasedLocaleContext;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Sylius\Component\Locale\Context\LocaleNotFoundException;
@@ -24,31 +24,33 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 final class RequestHeaderBasedLocaleContextTest extends TestCase
 {
-    /**
-     * @var RequestStack|MockObject
-     */
-    private MockObject $requestStackMock;
-    /**
-     * @var LocaleProviderInterface|MockObject
-     */
-    private MockObject $localeProviderMock;
+    /** @var RequestStack&MockObject */
+    private MockObject $requestStack;
+
+    /** @var LocaleProviderInterface&MockObject */
+    private MockObject $localeProvider;
+
     private RequestHeaderBasedLocaleContext $requestHeaderBasedLocaleContext;
+
     protected function setUp(): void
     {
-        $this->requestStackMock = $this->createMock(RequestStack::class);
-        $this->localeProviderMock = $this->createMock(LocaleProviderInterface::class);
-        $this->requestHeaderBasedLocaleContext = new RequestHeaderBasedLocaleContext($this->requestStackMock, $this->localeProviderMock);
+        parent::setUp();
+        $this->requestStack = $this->createMock(RequestStack::class);
+        $this->localeProvider = $this->createMock(LocaleProviderInterface::class);
+        $this->requestHeaderBasedLocaleContext = new RequestHeaderBasedLocaleContext($this->requestStack, $this->localeProvider);
     }
 
     public function testALocaleContext(): void
     {
-        $this->assertInstanceOf(LocaleContextInterface::class, $this->requestHeaderBasedLocaleContext);
+        self::assertInstanceOf(LocaleContextInterface::class, $this->requestHeaderBasedLocaleContext);
     }
 
     public function testThrowsLocaleNotFoundExceptionIfMainRequestIsNotFound(): void
     {
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn(null);
-        $this->expectException(LocaleNotFoundException::class);
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn(null);
+
+        self::expectException(LocaleNotFoundException::class);
+
         $this->requestHeaderBasedLocaleContext->getLocaleCode();
     }
 
@@ -56,10 +58,19 @@ final class RequestHeaderBasedLocaleContextTest extends TestCase
     {
         $request = new Request();
         $request->headers->set('Accept-Language', 'fr_FR');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($request);
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('pl_PL');
-        $this->localeProviderMock->expects($this->once())->method('getAvailableLocalesCodes')->willReturn(['pl_PL', 'de_DE']);
-        $this->expectException(LocaleNotFoundException::class);
+
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn($request);
+
+        $this->localeProvider->expects(self::once())
+            ->method('getDefaultLocaleCode')
+            ->willReturn('pl_PL');
+
+        $this->localeProvider->expects(self::once())
+            ->method('getAvailableLocalesCodes')
+            ->willReturn(['pl_PL', 'de_DE']);
+
+        self::expectException(LocaleNotFoundException::class);
+
         $this->requestHeaderBasedLocaleContext->getLocaleCode();
     }
 
@@ -67,39 +78,71 @@ final class RequestHeaderBasedLocaleContextTest extends TestCase
     {
         $request = new Request();
         $request->headers->set('Accept-Language', 'de_DE');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($request);
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('pl_PL');
-        $this->localeProviderMock->expects($this->once())->method('getAvailableLocalesCodes')->willReturn(['pl_PL', 'de_DE']);
-        $this->assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
+
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn($request);
+
+        $this->localeProvider->expects(self::once())
+            ->method('getDefaultLocaleCode')
+            ->willReturn('pl_PL');
+
+        $this->localeProvider->expects(self::once())
+            ->method('getAvailableLocalesCodes')
+            ->willReturn(['pl_PL', 'de_DE']);
+
+        self::assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
     }
 
     public function testResolvesLocaleFromMainRequestPreferredLanguageInMixedCasedLanguageSyntax(): void
     {
         $request = new Request();
         $request->headers->set('Accept-Language', 'dE-De');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($request);
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('pl_PL');
-        $this->localeProviderMock->expects($this->once())->method('getAvailableLocalesCodes')->willReturn(['pl_PL', 'de_DE']);
-        $this->assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
+
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn($request);
+
+        $this->localeProvider->expects(self::once())
+            ->method('getDefaultLocaleCode')
+            ->willReturn('pl_PL');
+
+        $this->localeProvider->expects(self::once())
+            ->method('getAvailableLocalesCodes')
+            ->willReturn(['pl_PL', 'de_DE']);
+
+        self::assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
     }
 
     public function testResolvesLocaleFromMainRequestPreferredLanguageInUpperCasedLanguageSyntax(): void
     {
         $request = new Request();
         $request->headers->set('Accept-Language', 'DE-DE');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($request);
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('pl_PL');
-        $this->localeProviderMock->expects($this->once())->method('getAvailableLocalesCodes')->willReturn(['pl_PL', 'de_DE']);
-        $this->assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
+
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn($request);
+
+        $this->localeProvider->expects(self::once())
+            ->method('getDefaultLocaleCode')
+            ->willReturn('pl_PL');
+
+        $this->localeProvider->expects(self::once())
+            ->method('getAvailableLocalesCodes')
+            ->willReturn(['pl_PL', 'de_DE']);
+
+        self::assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
     }
 
     public function testResolvesLocaleFromMainRequestPreferredLanguageInLowerCasedLanguageSyntax(): void
     {
         $request = new Request();
         $request->headers->set('Accept-Language', 'de-de');
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($request);
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('pl_PL');
-        $this->localeProviderMock->expects($this->once())->method('getAvailableLocalesCodes')->willReturn(['pl_PL', 'de_DE']);
-        $this->assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
+
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn($request);
+
+        $this->localeProvider->expects(self::once())
+            ->method('getDefaultLocaleCode')
+            ->willReturn('pl_PL');
+
+        $this->localeProvider->expects(self::once())
+            ->method('getAvailableLocalesCodes')
+            ->willReturn(['pl_PL', 'de_DE']);
+
+        self::assertSame('de_DE', $this->requestHeaderBasedLocaleContext->getLocaleCode());
     }
 }

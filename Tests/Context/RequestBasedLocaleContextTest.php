@@ -11,10 +11,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\LocaleBundle\Context;
+namespace Sylius\Bundle\LocaleBundle\Tests\Context;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\LocaleBundle\Context\RequestBasedLocaleContext;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Sylius\Component\Locale\Context\LocaleNotFoundException;
@@ -25,62 +25,82 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 final class RequestBasedLocaleContextTest extends TestCase
 {
-    /**
-     * @var RequestStack|MockObject
-     */
-    private MockObject $requestStackMock;
-    /**
-     * @var LocaleProviderInterface|MockObject
-     */
-    private MockObject $localeProviderMock;
+    /** @var RequestStack&MockObject */
+    private RequestStack $requestStack;
+
+    /** @var LocaleProviderInterface&MockObject */
+    private LocaleProviderInterface $localeProvider;
+
     private RequestBasedLocaleContext $requestBasedLocaleContext;
+
+    /** @var Request&MockObject */
+    private Request $request;
+
     protected function setUp(): void
     {
-        $this->requestStackMock = $this->createMock(RequestStack::class);
-        $this->localeProviderMock = $this->createMock(LocaleProviderInterface::class);
-        $this->requestBasedLocaleContext = new RequestBasedLocaleContext($this->requestStackMock, $this->localeProviderMock);
+        parent::setUp();
+        $this->requestStack = $this->createMock(RequestStack::class);
+        $this->localeProvider = $this->createMock(LocaleProviderInterface::class);
+        $this->requestBasedLocaleContext = new RequestBasedLocaleContext($this->requestStack, $this->localeProvider);
+        $this->request = $this->createMock(Request::class);
     }
 
     public function testALocaleContext(): void
     {
-        $this->assertInstanceOf(LocaleContextInterface::class, $this->requestBasedLocaleContext);
+        self::assertInstanceOf(LocaleContextInterface::class, $this->requestBasedLocaleContext);
     }
 
     public function testThrowsLocaleNotFoundExceptionIfMasterRequestIsNotFound(): void
     {
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn(null);
-        $this->expectException(LocaleNotFoundException::class);
+        $this->requestStack->expects(self::once())->method('getMainRequest')->willReturn(null);
+
+        self::expectException(LocaleNotFoundException::class);
+
         $this->requestBasedLocaleContext->getLocaleCode();
     }
 
     public function testThrowsLocaleNotFoundExceptionIfMasterRequestDoesNotHaveLocaleAttribute(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($requestMock);
-        $requestMock->attributes = new ParameterBag();
-        $this->expectException(LocaleNotFoundException::class);
+        $this->requestStack->expects(self::once())
+            ->method('getMainRequest')
+            ->willReturn($this->request);
+
+        $this->request->attributes = new ParameterBag();
+
+        self::expectException(LocaleNotFoundException::class);
+
         $this->requestBasedLocaleContext->getLocaleCode();
     }
 
     public function testThrowsLocaleNotFoundExceptionIfMasterRequestLocaleCodeIsNotAmongAvailableOnes(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($requestMock);
-        $requestMock->attributes = new ParameterBag(['_locale' => 'en_US']);
-        $this->localeProviderMock->expects($this->once())->method('getAvailableLocalesCodes')->willReturn(['pl_PL', 'de_DE']);
-        $this->expectException(LocaleNotFoundException::class);
+        $this->requestStack->expects(self::once())
+            ->method('getMainRequest')
+            ->willReturn($this->request);
+
+        $this->request->attributes = new ParameterBag(['_locale' => 'en_US']);
+
+        $this->localeProvider->expects(self::once())
+            ->method('getAvailableLocalesCodes')
+            ->willReturn(['pl_PL', 'de_DE']);
+
+        self::expectException(LocaleNotFoundException::class);
+
         $this->requestBasedLocaleContext->getLocaleCode();
     }
 
     public function testReturnsMasterRequestLocaleCode(): void
     {
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        $this->requestStackMock->expects($this->once())->method('getMainRequest')->willReturn($requestMock);
-        $requestMock->attributes = new ParameterBag(['_locale' => 'pl_PL']);
-        $this->localeProviderMock->expects($this->once())->method('getAvailableLocalesCodes')->willReturn(['pl_PL', 'de_DE']);
-        $this->assertSame('pl_PL', $this->requestBasedLocaleContext->getLocaleCode());
+        $this->requestStack->expects(self::once())
+            ->method('getMainRequest')
+            ->willReturn($this->request);
+
+        $this->request->attributes = new ParameterBag(['_locale' => 'pl_PL']);
+
+        $this->localeProvider->expects(self::once())
+            ->method('getAvailableLocalesCodes')
+            ->willReturn(['pl_PL', 'de_DE']);
+
+        self::assertSame('pl_PL', $this->requestBasedLocaleContext->getLocaleCode());
     }
 }

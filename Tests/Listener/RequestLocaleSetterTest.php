@@ -11,10 +11,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\Bundle\LocaleBundle\Listener;
+namespace Sylius\Bundle\LocaleBundle\Tests\Listener;
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\LocaleBundle\Listener\RequestLocaleSetter;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Sylius\Component\Locale\Provider\LocaleProviderInterface;
@@ -23,33 +23,41 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 final class RequestLocaleSetterTest extends TestCase
 {
-    /**
-     * @var LocaleContextInterface|MockObject
-     */
-    private MockObject $localeContextMock;
-    /**
-     * @var LocaleProviderInterface|MockObject
-     */
-    private MockObject $localeProviderMock;
+    /** @var LocaleContextInterface&MockObject */
+    private MockObject $localeContext;
+
+    /** @var LocaleProviderInterface&MockObject */
+    private MockObject $localeProvider;
+
     private RequestLocaleSetter $requestLocaleSetter;
+
     protected function setUp(): void
     {
-        $this->localeContextMock = $this->createMock(LocaleContextInterface::class);
-        $this->localeProviderMock = $this->createMock(LocaleProviderInterface::class);
-        $this->requestLocaleSetter = new RequestLocaleSetter($this->localeContextMock, $this->localeProviderMock);
+        parent::setUp();
+        $this->localeContext = $this->createMock(LocaleContextInterface::class);
+        $this->localeProvider = $this->createMock(LocaleProviderInterface::class);
+        $this->requestLocaleSetter = new RequestLocaleSetter($this->localeContext, $this->localeProvider);
     }
 
     public function testSetsLocaleAndDefaultLocaleOnRequest(): void
     {
-        /** @var RequestEvent|MockObject $eventMock */
-        $eventMock = $this->createMock(RequestEvent::class);
-        /** @var Request|MockObject $requestMock */
-        $requestMock = $this->createMock(Request::class);
-        $eventMock->expects($this->once())->method('getRequest')->willReturn($requestMock);
-        $this->localeContextMock->expects($this->once())->method('getLocaleCode')->willReturn('pl_PL');
-        $this->localeProviderMock->expects($this->once())->method('getDefaultLocaleCode')->willReturn('en_US');
-        $requestMock->expects($this->once())->method('setLocale')->with('pl_PL');
-        $requestMock->expects($this->once())->method('setDefaultLocale')->with('en_US');
-        $this->requestLocaleSetter->onKernelRequest($eventMock);
+        /** @var RequestEvent&MockObject $event */
+        $event = $this->createMock(RequestEvent::class);
+        /** @var Request&MockObject $request */
+        $request = $this->createMock(Request::class);
+
+        $event->expects(self::atLeastOnce())->method('getRequest')->willReturn($request);
+
+        $this->localeContext->expects(self::once())->method('getLocaleCode')->willReturn('pl_PL');
+
+        $this->localeProvider->expects(self::once())
+            ->method('getDefaultLocaleCode')
+            ->willReturn('en_US');
+
+        $request->expects(self::once())->method('setLocale')->with('pl_PL');
+
+        $request->expects(self::once())->method('setDefaultLocale')->with('en_US');
+
+        $this->requestLocaleSetter->onKernelRequest($event);
     }
 }

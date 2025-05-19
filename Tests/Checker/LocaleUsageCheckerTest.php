@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\Bundle\LocaleBundle\Checker;
 
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
-use Sylius\Bundle\LocaleBundle\Checker\LocaleUsageChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Persisters\Entity\EntityPersister;
 use Doctrine\ORM\UnitOfWork;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Sylius\Bundle\LocaleBundle\Checker\LocaleUsageChecker;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Component\Locale\Context\LocaleNotFoundException;
 use Sylius\Component\Locale\Model\LocaleInterface;
@@ -29,19 +29,17 @@ use Sylius\Resource\Metadata\RegistryInterface;
 
 final class LocaleUsageCheckerTest extends TestCase
 {
-    /**
-     * @var RepositoryInterface|MockObject
-     */
+    /** @var RepositoryInterface&MockObject */
     private MockObject $localeRepositoryMock;
-    /**
-     * @var RegistryInterface|MockObject
-     */
+
+    /** @var RegistryInterface&MockObject */
     private MockObject $registryMock;
-    /**
-     * @var EntityManagerInterface|MockObject
-     */
+
+    /** @var EntityManagerInterface&MockObject */
     private MockObject $entityManagerMock;
+
     private LocaleUsageChecker $localeUsageChecker;
+
     protected function setUp(): void
     {
         $this->localeRepositoryMock = $this->createMock(RepositoryInterface::class);
@@ -59,15 +57,15 @@ final class LocaleUsageCheckerTest extends TestCase
 
     public function testReturnsTrueWhenAtLeastOneUsageOfLocaleFound(): void
     {
-        /** @var LocaleInterface|MockObject $localeMock */
+        /** @var LocaleInterface&MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
-        /** @var MetadataInterface|MockObject $firstResourceMetadataMock */
+        /** @var MetadataInterface&MockObject $firstResourceMetadataMock */
         $firstResourceMetadataMock = $this->createMock(MetadataInterface::class);
-        /** @var MetadataInterface|MockObject $secondResourceMetadataMock */
+        /** @var MetadataInterface&MockObject $secondResourceMetadataMock */
         $secondResourceMetadataMock = $this->createMock(MetadataInterface::class);
-        /** @var UnitOfWork|MockObject $unitOfWorkMock */
+        /** @var UnitOfWork&MockObject $unitOfWorkMock */
         $unitOfWorkMock = $this->createMock(UnitOfWork::class);
-        /** @var EntityPersister|MockObject $entityPersisterMock */
+        /** @var EntityPersister&MockObject $entityPersisterMock */
         $entityPersisterMock = $this->createMock(EntityPersister::class);
         $localeRepository = new EntityRepository($this->entityManagerMock, new ClassMetadata(LocaleInterface::class));
         $this->localeUsageChecker = new LocaleUsageChecker($localeRepository, $this->registryMock, $this->entityManagerMock);
@@ -90,15 +88,15 @@ final class LocaleUsageCheckerTest extends TestCase
 
     public function testReturnsFalseWhenNoUsageOfLocaleFound(): void
     {
-        /** @var LocaleInterface|MockObject $localeMock */
+        /** @var LocaleInterface&MockObject $localeMock */
         $localeMock = $this->createMock(LocaleInterface::class);
-        /** @var MetadataInterface|MockObject $firstResourceMetadataMock */
+        /** @var MetadataInterface&MockObject $firstResourceMetadataMock */
         $firstResourceMetadataMock = $this->createMock(MetadataInterface::class);
-        /** @var MetadataInterface|MockObject $secondResourceMetadataMock */
+        /** @var MetadataInterface&MockObject $secondResourceMetadataMock */
         $secondResourceMetadataMock = $this->createMock(MetadataInterface::class);
-        /** @var UnitOfWork|MockObject $unitOfWorkMock */
+        /** @var UnitOfWork&MockObject $unitOfWorkMock */
         $unitOfWorkMock = $this->createMock(UnitOfWork::class);
-        /** @var EntityPersister|MockObject $entityPersisterMock */
+        /** @var EntityPersister&MockObject $entityPersisterMock */
         $entityPersisterMock = $this->createMock(EntityPersister::class);
         $localeRepository = new EntityRepository($this->entityManagerMock, new ClassMetadata(LocaleInterface::class));
         $this->localeUsageChecker = new LocaleUsageChecker($localeRepository, $this->registryMock, $this->entityManagerMock);
