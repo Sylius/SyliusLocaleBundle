@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\LocaleBundle\Tests\Context;
+namespace Tests\Sylius\Bundle\LocaleBundle\Context;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

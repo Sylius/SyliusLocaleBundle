@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\LocaleBundle\Tests\Doctrine\EventListener;
+namespace Tests\Sylius\Bundle\LocaleBundle\Doctrine\EventListener;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

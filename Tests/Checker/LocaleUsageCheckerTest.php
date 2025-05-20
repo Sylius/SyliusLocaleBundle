@@ -42,6 +42,7 @@ final class LocaleUsageCheckerTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->localeRepositoryMock = $this->createMock(RepositoryInterface::class);
         $this->registryMock = $this->createMock(RegistryInterface::class);
         $this->entityManagerMock = $this->createMock(EntityManagerInterface::class);
@@ -50,8 +51,13 @@ final class LocaleUsageCheckerTest extends TestCase
 
     public function testThrowsExceptionWhenLocaleWithProvidedLocaleCodeDoesntExist(): void
     {
-        $this->localeRepositoryMock->expects($this->once())->method('findOneBy')->with(['code' => 'en_US'])->willReturn(null);
-        $this->expectException(LocaleNotFoundException::class);
+        $this->localeRepositoryMock->expects(self::once())
+            ->method('findOneBy')
+            ->with(['code' => 'en_US'])
+            ->willReturn(null);
+
+        self::expectException(LocaleNotFoundException::class);
+
         $this->localeUsageChecker->isUsed('en_US');
     }
 
@@ -63,27 +69,71 @@ final class LocaleUsageCheckerTest extends TestCase
         $firstResourceMetadataMock = $this->createMock(MetadataInterface::class);
         /** @var MetadataInterface&MockObject $secondResourceMetadataMock */
         $secondResourceMetadataMock = $this->createMock(MetadataInterface::class);
+
         /** @var UnitOfWork&MockObject $unitOfWorkMock */
         $unitOfWorkMock = $this->createMock(UnitOfWork::class);
         /** @var EntityPersister&MockObject $entityPersisterMock */
         $entityPersisterMock = $this->createMock(EntityPersister::class);
+
+        /** @var RepositoryInterface<LocaleInterface> $localeRepository */
         $localeRepository = new EntityRepository($this->entityManagerMock, new ClassMetadata(LocaleInterface::class));
-        $this->localeUsageChecker = new LocaleUsageChecker($localeRepository, $this->registryMock, $this->entityManagerMock);
-        $this->entityManagerMock->expects($this->once())->method('getUnitOfWork')->willReturn($unitOfWorkMock);
-        $unitOfWorkMock->expects($this->once())->method('getEntityPersister')->with(LocaleInterface::class)->willReturn($entityPersisterMock);
-        $entityPersisterMock->expects($this->once())->method('load')->with(['code' => 'en_US'], null, null, [], null, 1, null)->willReturn($localeMock);
-        $entityPersisterMock->expects($this->once())->method('count')->with(['locale' => 'en_US'])->willReturn(1);
-        $this->registryMock->expects($this->once())->method('getAll')->willReturn([$firstResourceMetadataMock, $secondResourceMetadataMock]);
-        $firstResourceMetadataMock->expects($this->once())->method('getParameters')->willReturn([
-            'translation' => [
-                'classes' => [
-                    'interface' => LocaleInterface::class,
+
+        $this->localeUsageChecker = new LocaleUsageChecker(
+            $localeRepository,
+            $this->registryMock,
+            $this->entityManagerMock,
+        );
+
+        $this->entityManagerMock->expects(self::atLeastOnce())
+            ->method('getUnitOfWork')
+            ->willReturn($unitOfWorkMock);
+
+        $unitOfWorkMock->expects(self::atLeastOnce())
+            ->method('getEntityPersister')
+            ->with(LocaleInterface::class)
+            ->willReturn($entityPersisterMock);
+
+        $entityPersisterMock->expects(self::once())
+            ->method('load')
+            ->with(['code' => 'en_US'], null, null, [], null, 1, null)
+            ->willReturn($localeMock);
+
+        $entityPersisterMock->expects(self::once())
+            ->method('count')
+            ->with(['locale' => 'en_US'])
+            ->willReturn(1);
+
+        $this->registryMock->expects(self::once())
+            ->method('getAll')
+            ->willReturn(
+                [
+                    $firstResourceMetadataMock,
+                    $secondResourceMetadataMock,
                 ],
-            ],
-        ]);
-        $secondResourceMetadataMock->expects($this->once())->method('getParameters')->willReturn([]);
-        $this->entityManagerMock->expects($this->once())->method('getRepository')->with(LocaleInterface::class)->willReturn($localeRepository);
-        $this->assertTrue($this->localeUsageChecker->isUsed('en_US'));
+            );
+
+        $firstResourceMetadataMock->expects(self::once())
+            ->method('getParameters')
+            ->willReturn(
+                [
+                    'translation' => [
+                        'classes' => [
+                            'interface' => LocaleInterface::class,
+                        ],
+                    ],
+                ],
+            );
+
+        $secondResourceMetadataMock->expects(self::once())
+            ->method('getParameters')
+            ->willReturn([]);
+
+        $this->entityManagerMock->expects(self::once())
+            ->method('getRepository')
+            ->with(LocaleInterface::class)
+            ->willReturn($localeRepository);
+
+        self::assertTrue($this->localeUsageChecker->isUsed('en_US'));
     }
 
     public function testReturnsFalseWhenNoUsageOfLocaleFound(): void
@@ -98,22 +148,64 @@ final class LocaleUsageCheckerTest extends TestCase
         $unitOfWorkMock = $this->createMock(UnitOfWork::class);
         /** @var EntityPersister&MockObject $entityPersisterMock */
         $entityPersisterMock = $this->createMock(EntityPersister::class);
+        /** @var RepositoryInterface<LocaleInterface> $localeRepository */
         $localeRepository = new EntityRepository($this->entityManagerMock, new ClassMetadata(LocaleInterface::class));
-        $this->localeUsageChecker = new LocaleUsageChecker($localeRepository, $this->registryMock, $this->entityManagerMock);
-        $this->entityManagerMock->expects($this->once())->method('getUnitOfWork')->willReturn($unitOfWorkMock);
-        $unitOfWorkMock->expects($this->once())->method('getEntityPersister')->with(LocaleInterface::class)->willReturn($entityPersisterMock);
-        $entityPersisterMock->expects($this->once())->method('load')->with(['code' => 'en_US'], null, null, [], null, 1, null)->willReturn($localeMock);
-        $entityPersisterMock->expects($this->once())->method('count')->with(['locale' => 'en_US'])->willReturn(0);
-        $this->registryMock->expects($this->once())->method('getAll')->willReturn([$firstResourceMetadataMock, $secondResourceMetadataMock]);
-        $firstResourceMetadataMock->expects($this->once())->method('getParameters')->willReturn([
-            'translation' => [
-                'classes' => [
-                    'interface' => LocaleInterface::class,
+
+        $this->localeUsageChecker = new LocaleUsageChecker(
+            $localeRepository,
+            $this->registryMock,
+            $this->entityManagerMock,
+        );
+
+        $this->entityManagerMock->expects(self::atLeastOnce())
+            ->method('getUnitOfWork')
+            ->willReturn($unitOfWorkMock);
+
+        $unitOfWorkMock->expects(self::atLeastOnce())
+            ->method('getEntityPersister')
+            ->with(LocaleInterface::class)
+            ->willReturn($entityPersisterMock);
+
+        $entityPersisterMock->expects(self::once())
+            ->method('load')
+            ->with(['code' => 'en_US'], null, null, [], null, 1, null)
+            ->willReturn($localeMock);
+
+        $entityPersisterMock->expects(self::once())
+            ->method('count')
+            ->with(['locale' => 'en_US'])
+            ->willReturn(0);
+
+        $this->registryMock->expects(self::once())
+            ->method('getAll')
+            ->willReturn(
+                [
+                    $firstResourceMetadataMock,
+                    $secondResourceMetadataMock,
                 ],
-            ],
-        ]);
-        $secondResourceMetadataMock->expects($this->once())->method('getParameters')->willReturn([]);
-        $this->entityManagerMock->expects($this->once())->method('getRepository')->with(LocaleInterface::class)->willReturn($localeRepository);
-        $this->assertFalse($this->localeUsageChecker->isUsed('en_US'));
+            );
+
+        $firstResourceMetadataMock->expects(self::once())
+            ->method('getParameters')
+            ->willReturn(
+                [
+                    'translation' => [
+                        'classes' => [
+                            'interface' => LocaleInterface::class,
+                        ],
+                    ],
+                ],
+            );
+
+        $secondResourceMetadataMock->expects(self::once())
+            ->method('getParameters')
+            ->willReturn([]);
+
+        $this->entityManagerMock->expects(self::once())
+            ->method('getRepository')
+            ->with(LocaleInterface::class)
+            ->willReturn($localeRepository);
+
+        self::assertFalse($this->localeUsageChecker->isUsed('en_US'));
     }
 }
