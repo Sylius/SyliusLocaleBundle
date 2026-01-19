@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\Bundle\LocaleBundle\Tests\Stub;
+namespace Tests\Sylius\Bundle\LocaleBundle\Stub;
 
 use Sylius\Bundle\LocaleBundle\Attribute\AsLocaleContext;
 use Sylius\Component\Locale\Context\LocaleContextInterface;

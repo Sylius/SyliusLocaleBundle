@@ -4,5 +4,5 @@
 sylius:
     form:
         locale:
-            name: 'Nume'
-            select: 'Selectați un local...'
+            name: 'Name'
+            select: 'Wählen Sie eine Lokalisierung aus...'
